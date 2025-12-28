@@ -1,10 +1,12 @@
 package in.abhiram.food_delivery.controller;
 
-import org.apache.coyote.Response;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -13,28 +15,77 @@ import in.abhiram.food_delivery.request.FoodRequest;
 import in.abhiram.food_delivery.response.FoodResponse;
 import in.abhiram.food_delivery.service.FoodService;
 import lombok.AllArgsConstructor;
-import tools.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
+
+@Slf4j
 @RestController
-@RequestMapping("/api/foods")
+@RequestMapping("/foods")
 @AllArgsConstructor
 public class FoodController {
 
     private final FoodService foodService;
 
+    @PostMapping
     public FoodResponse addFood(@RequestPart("food") String foodString,
             @RequestPart("file") MultipartFile file) {
+        
+                log.info("[INCOMING REQUEST] POST /foods - Adding new food item");
+                log.info("[REQUEST] Food data: {}", foodString);
+                log.info("[REQUEST] File name: {}, Size: {} bytes, Content Type: {}", 
+                    file.getOriginalFilename(), file.getSize(), file.getContentType());
 
                 ObjectMapper objectMapper = new ObjectMapper();
                 FoodRequest foodRequest= null;
                 try {
                     foodRequest = objectMapper.readValue(foodString, FoodRequest.class);
+                    log.debug("[PARSE SUCCESS] Food request parsed: name={}, category={}, price={}", 
+                        foodRequest.getName(), foodRequest.getCategory(), foodRequest.getPrice());
                 } catch (Exception e) {
+                    log.error("[PARSE ERROR] Failed to parse food data: {}", e.getMessage());
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid food data: " + e.getMessage());
                 }
 
+                log.info("[PROCESSING] Calling service layer to add food");
                 FoodResponse foodResponse=foodService.addFood(foodRequest, file);
+                
+                log.info("[RESPONSE] Successfully added food with ID: {}", foodResponse.getId());
+                log.info("[RESPONSE] Food details: {}", foodResponse);
+                log.info("[OUTGOING RESPONSE] POST /foods - Completed successfully\n");
+                
                 return foodResponse;
     }
+
+    @GetMapping
+    public List<FoodResponse> getAllFoods() {
+        log.info("[INCOMING REQUEST] GET /foods - Fetching all food items");
+        
+        List<FoodResponse> foodResponses = foodService.getAllFoods();
+        
+        log.info("[RESPONSE] Retrieved {} food items", foodResponses.size());
+        log.info("[OUTGOING RESPONSE] GET /foods - Completed successfully\n");
+        
+        return foodResponses;
+    }
+
+    @GetMapping("/{foodId}")
+    public FoodResponse getFoodById(@PathVariable String foodId) {
+       
+        FoodResponse foodResponse = foodService.readFood(foodId);
+        return foodResponse;
+    }
+
+    @DeleteMapping("/{foodId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteFood(@PathVariable String foodId) {
+        foodService.deleteFood(foodId);
+    }
+
     
 }
