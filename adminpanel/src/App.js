@@ -6,6 +6,8 @@ import Orders from './pages/Orders';
 import Menu from './pages/Menu';
 import Users from './pages/Users';
 import Login from './pages/Login';
+import { CartProvider } from './context/CartContext';
+import { Toaster } from 'react-hot-toast';
 
 const PrivateRoute = () => {
   const isAuthenticated = !!localStorage.getItem('authToken');
@@ -14,22 +16,25 @@ const PrivateRoute = () => {
 
 export const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route element={<PrivateRoute />}>
-          <Route path="/*" element={
-            <MainLayout>
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/orders" element={<Orders />} />
-                <Route path="/menu" element={<Menu />} />
-                <Route path="/users" element={<Users />} />
-              </Routes>
-            </MainLayout>
-          } />
-        </Route>
-      </Routes>
-    </Router>
+    <CartProvider>
+      <Toaster position="top-center" reverseOrder={false} />
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route element={<PrivateRoute />}>
+            <Route path="/*" element={
+              <MainLayout>
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/orders" element={<Orders />} />
+                  <Route path="/menu" element={<Menu />} />
+                  <Route path="/users" element={<Users />} />
+                </Routes>
+              </MainLayout>
+            } />
+          </Route>
+        </Routes>
+      </Router>
+    </CartProvider>
   );
 };

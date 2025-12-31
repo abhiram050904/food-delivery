@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Modal from '../components/Modal';
 import AddFoodForm from '../components/AddFoodForm';
+import { useCart } from '../context/CartContext';
 
 const Menu = () => {
   const [menuItems, setMenuItems] = useState([]);
@@ -9,6 +10,7 @@ const Menu = () => {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchMenuItems = async () => {
@@ -90,8 +92,11 @@ const Menu = () => {
                 <div className="mt-4 flex items-center justify-between">
                   <span className="text-xl font-bold text-orange-500">${item.price.toFixed(2)}</span>
                   <div className="flex items-center gap-2">
-                    <button className="p-1.5 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700">
-                      <span className="material-icons-outlined text-lg">edit</span>
+                    <button
+                      onClick={() => addToCart(item.id, 1)}
+                      className="p-1.5 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <span className="material-icons-outlined text-lg">add_shopping_cart</span>
                     </button>
                     <button
                       onClick={() => handleDelete(item.id)}

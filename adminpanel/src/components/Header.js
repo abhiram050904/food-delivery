@@ -1,6 +1,10 @@
 import React from 'react';
+import { useCart } from '../context/CartContext';
 
 const Header = () => {
+  const { cartItems, setIsCartOpen } = useCart();
+  const cartItemCount = cartItems.length;
+
   return (
     <header className="h-16 flex items-center justify-between px-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
       <div className="flex items-center md:hidden">
@@ -33,6 +37,12 @@ const Header = () => {
           <span className="material-icons-outlined hidden dark:block">light_mode</span>
         </button>
         <div className="flex items-center space-x-3 pl-4 border-l border-gray-200 dark:border-gray-700">
+          <button onClick={() => setIsCartOpen(true)} className="relative p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            <span className="material-icons-outlined">shopping_cart</span>
+            {cartItemCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">{cartItemCount}</span>
+            )}
+          </button>
           <div className="text-right hidden sm:block">
             <p className="text-sm font-medium text-gray-900 dark:text-white">Abhiram</p>
             <p className="text-xs text-gray-500 dark:text-gray-400">Super Admin</p>
