@@ -6,6 +6,8 @@ import Orders from './pages/Orders';
 import Menu from './pages/Menu';
 import Users from './pages/Users';
 import Login from './pages/Login';
+import Cart from './pages/Cart';
+import OrderStatus from './pages/OrderStatus';
 import { CartProvider } from './context/CartContext';
 import { Toaster } from 'react-hot-toast';
 
@@ -29,6 +31,8 @@ export const App = () => {
                   <Route path="/orders" element={<Orders />} />
                   <Route path="/menu" element={<Menu />} />
                   <Route path="/users" element={<Users />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/order-status" element={<OrderStatus />} />
                 </Routes>
               </MainLayout>
             } />
