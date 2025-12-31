@@ -22,7 +22,7 @@ public class UserServiceImplementation implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
-
+    private final AuthenticationFacade authenticationFacade;
     @Override
     public UserResponse register(UserRequest userRequest) {
         // Validate password strength
@@ -94,6 +94,14 @@ public class UserServiceImplementation implements UserService {
             throw new RuntimeException("User not found with id: " + id);
         }
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public String FindByUserId(UserService userService) {
+        String loggedInUsername = authenticationFacade.getAuthentication().getName();
+        UserEntity user = userRepository.findByUsername(loggedInUsername)
+            .orElseThrow(() -> new RuntimeException("User not found with username: " + loggedInUsername));
+        return user.getId();
     }
 
     private void validatePassword(String password) {

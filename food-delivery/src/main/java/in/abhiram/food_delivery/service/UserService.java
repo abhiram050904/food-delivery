@@ -15,5 +15,7 @@ public interface UserService {
 
     UserResponse updateUser(String id, UserRequest userRequest);
 
+    String FindByUserId(UserService userService);
+
     void deleteUser(String id);
 }
