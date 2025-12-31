@@ -9,10 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserRequest {
-    
-    private String username;
-    private String password;
+public class OrderRequest {
+    private String userAddress;
+    private String phoneNumber;
     private String email;
-    private String role; // Optional: defaults to ROLE_USER
 }

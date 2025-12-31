@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -23,6 +24,7 @@ import lombok.AllArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 @AllArgsConstructor
 public class SecurityConfig {
 
@@ -34,7 +36,14 @@ public class SecurityConfig {
        http
        .cors(Customizer.withDefaults())
        .csrf(AbstractHttpConfigurer::disable)
-       .authorizeHttpRequests(auth->auth.requestMatchers("/users/register","/users/login","/users/**","/foods/**").permitAll().anyRequest().authenticated())
+       .authorizeHttpRequests(auth->auth
+           .requestMatchers("/users/register","/users/login").permitAll()
+           .requestMatchers("/foods/*/reviews/**", "/foods/reviews/**").authenticated()  // Reviews require auth
+           .requestMatchers("/foods/search", "/foods/filter", "/foods/*/rating").permitAll()  // Public search/filter/ratings
+           .requestMatchers(org.springframework.http.HttpMethod.GET, "/foods", "/foods/*").permitAll()  // Read foods is public
+           .requestMatchers("/foods/**").authenticated()  // Create/Update/Delete foods require auth (admin)
+           .requestMatchers("/cart/**", "/orders/**").authenticated()  // Cart and orders require auth
+           .anyRequest().authenticated())
        .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
        return http.build(); 

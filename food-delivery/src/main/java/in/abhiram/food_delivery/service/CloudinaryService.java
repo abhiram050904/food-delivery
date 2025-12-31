@@ -134,10 +134,72 @@ public class CloudinaryService implements FoodService {
     }
 
     @Override
+    public FoodResponse updateFood(String foodId, FoodRequest foodRequest, MultipartFile file) {
+        log.info("[SERVICE] updateFood() - Updating food item with ID: {}", foodId);
+        
+        FoodEntity foodEntity = foodRepository.findById(foodId)
+                .orElseThrow(() -> new RuntimeException("Food item not found with ID: " + foodId));
+        
+        log.info("[SERVICE] Updating food details");
+        foodEntity.setName(foodRequest.getName());
+        foodEntity.setDescription(foodRequest.getDescription());
+        foodEntity.setPrice(foodRequest.getPrice());
+        foodEntity.setCategory(foodRequest.getCategory());
+        
+        // Update image if new file provided
+        if (file != null && !file.isEmpty()) {
+            log.info("[SERVICE] New image provided, uploading to Cloudinary");
+            String imageUrl = uploadFile(file);
+            foodEntity.setImageUrl(imageUrl);
+        }
+        
+        log.info("[SERVICE] Saving updated food entity");
+        foodEntity = foodRepository.save(foodEntity);
+        log.info("[SERVICE] updateFood() - Completed successfully");
+        
+        return convertToFoodResponse(foodEntity);
+    }
+
+    @Override
     public void deleteFood(String foodId) {
         if (!foodRepository.existsById(foodId)) {
             return;
         }
         foodRepository.deleteById(foodId);
+    }
+
+    @Override
+    public List<FoodResponse> searchFoods(String query) {
+        log.info("[SERVICE] searchFoods() - Searching for foods with query: {}", query);
+        
+        List<FoodEntity> foodEntities = foodRepository.findByNameContainingIgnoreCase(query);
+        
+        log.info("[SERVICE] Found {} matching foods", foodEntities.size());
+        return foodEntities.stream()
+                .map(this::convertToFoodResponse)
+                .toList();
+    }
+
+    @Override
+    public List<FoodResponse> filterFoods(String category, Double minPrice, Double maxPrice) {
+        log.info("[SERVICE] filterFoods() - Filtering foods: category={}, minPrice={}, maxPrice={}", 
+                category, minPrice, maxPrice);
+        
+        List<FoodEntity> foodEntities;
+        
+        if (category != null && minPrice != null && maxPrice != null) {
+            foodEntities = foodRepository.findByCategoryAndPriceRange(category, minPrice, maxPrice);
+        } else if (category != null) {
+            foodEntities = foodRepository.findByCategory(category);
+        } else if (minPrice != null && maxPrice != null) {
+            foodEntities = foodRepository.findByPriceBetween(minPrice, maxPrice);
+        } else {
+            foodEntities = foodRepository.findAll();
+        }
+        
+        log.info("[SERVICE] Found {} matching foods", foodEntities.size());
+        return foodEntities.stream()
+                .map(this::convertToFoodResponse)
+                .toList();
     }
 }

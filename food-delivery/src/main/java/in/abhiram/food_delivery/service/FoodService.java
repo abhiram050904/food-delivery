@@ -16,6 +16,12 @@ public interface FoodService {
     List<FoodResponse> getAllFoods();
 
     FoodResponse readFood(String foodId);
+    
+    FoodResponse updateFood(String foodId, FoodRequest foodRequest, MultipartFile file);
 
     void deleteFood(String foodId);
+    
+    List<FoodResponse> searchFoods(String query);
+    
+    List<FoodResponse> filterFoods(String category, Double minPrice, Double maxPrice);
 }

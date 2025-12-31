@@ -104,6 +104,13 @@ public class UserServiceImplementation implements UserService {
         return user.getId();
     }
 
+    @Override
+    public UserResponse getUserByUsername(String username) {
+        UserEntity user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+        return convUserResponseFromUserEntity(user);
+    }
+
     private void validatePassword(String password) {
         if (password == null || password.length() < 8) {
             throw new RuntimeException("Password must be at least 8 characters long");
@@ -135,6 +142,7 @@ public class UserServiceImplementation implements UserService {
                 .username(userRequest.getUsername())
                 .password(userRequest.getPassword()) // Will be encoded in register method
                 .email(userRequest.getEmail())
+                .role(userRequest.getRole() != null ? userRequest.getRole() : "ROLE_USER") // Default to USER
                 .build();
     }
 
@@ -143,6 +151,7 @@ public class UserServiceImplementation implements UserService {
                 .id(userEntity.getId())
                 .username(userEntity.getUsername())
                 .email(userEntity.getEmail())
+                .role(userEntity.getRole())
                 .build();
     }
     

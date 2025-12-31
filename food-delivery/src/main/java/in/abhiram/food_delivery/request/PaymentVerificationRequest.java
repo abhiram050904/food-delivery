@@ -9,10 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserRequest {
-    
-    private String username;
-    private String password;
-    private String email;
-    private String role; // Optional: defaults to ROLE_USER
+public class PaymentVerificationRequest {
+    private String orderId;
+    private String razorpayOrderId;
+    private String razorpayPaymentId;
+    private String razorpaySignature;
 }
